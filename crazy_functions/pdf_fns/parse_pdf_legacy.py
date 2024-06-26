@@ -1,83 +1,15 @@
-from toolbox import CatchException, report_exception, get_log_folder, gen_time_str, check_packages
-from toolbox import update_ui, promote_file_to_downloadzone, update_ui_lastest_msg, disable_auto_promotion
+from toolbox import get_log_folder
+from toolbox import update_ui, promote_file_to_downloadzone
 from toolbox import write_history_to_file, promote_file_to_downloadzone
-from .crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
-from .crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency
-from .crazy_utils import read_and_clean_pdf_text
-from .pdf_fns.parse_pdf import parse_pdf, get_avail_grobid_url, translate_pdf
-from colorful import *
+from crazy_functions.crazy_utils import request_gpt_model_in_new_thread_with_ui_alive
+from crazy_functions.crazy_utils import request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency
+from crazy_functions.crazy_utils import read_and_clean_pdf_text
+from shared_utils.colorful import *
 import os
 
-
-@CatchException
-def 批量翻译PDF文档(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, user_request):
-
-    disable_auto_promotion(chatbot)
-    # 基本信息：功能、贡献者
-    chatbot.append([
-        "函数插件功能？",
-        "批量翻译PDF文档。函数插件贡献者: Binary-Husky"])
-    yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
-
-    # 尝试导入依赖，如果缺少依赖，则给出安装建议
-    try:
-        check_packages(["fitz", "tiktoken", "scipdf"])
-    except:
-        report_exception(chatbot, history,
-                         a=f"解析项目: {txt}",
-                         b=f"导入软件依赖失败。使用该模块需要额外依赖，安装方法```pip install --upgrade pymupdf tiktoken scipdf_parser```。")
-        yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
-        return
-
-    # 清空历史，以免输入溢出
-    history = []
-
-    from .crazy_utils import get_files_from_everything
-    success, file_manifest, project_folder = get_files_from_everything(txt, type='.pdf')
-    # 检测输入参数，如没有给定输入参数，直接退出
-    if not success:
-        if txt == "": txt = '空空如也的输入栏'
-
-    # 如果没找到任何文件
-    if len(file_manifest) == 0:
-        report_exception(chatbot, history,
-                         a=f"解析项目: {txt}", b=f"找不到任何.pdf拓展名的文件: {txt}")
-        yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
-        return
-
-    # 开始正式执行任务
-    grobid_url = get_avail_grobid_url()
-    if grobid_url is not None:
-        yield from 解析PDF_基于GROBID(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, grobid_url)
-    else:
-        yield from update_ui_lastest_msg("GROBID服务不可用，请检查config中的GROBID_URL。作为替代，现在将执行效果稍差的旧版代码。", chatbot, history, delay=3)
-        yield from 解析PDF(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt)
-
-
-def 解析PDF_基于GROBID(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, grobid_url):
-    import copy, json
-    TOKEN_LIMIT_PER_FRAGMENT = 1024
-    generated_conclusion_files = []
-    generated_html_files = []
-    DST_LANG = "中文"
-    from crazy_functions.pdf_fns.report_gen_html import construct_html
-    for index, fp in enumerate(file_manifest):
-        chatbot.append(["当前进度：", f"正在连接GROBID服务，请稍候: {grobid_url}\n如果等待时间过长，请修改config中的GROBID_URL，可修改成本地GROBID服务。"]); yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
-        article_dict = parse_pdf(fp, grobid_url)
-        grobid_json_res = os.path.join(get_log_folder(), gen_time_str() + "grobid.json")
-        with open(grobid_json_res, 'w+', encoding='utf8') as f:
-            f.write(json.dumps(article_dict, indent=4, ensure_ascii=False))
-        promote_file_to_downloadzone(grobid_json_res, chatbot=chatbot)
-        
-        if article_dict is None: raise RuntimeError("解析PDF失败，请检查PDF是否损坏。")
-        yield from translate_pdf(article_dict, llm_kwargs, chatbot, fp, generated_conclusion_files, TOKEN_LIMIT_PER_FRAGMENT, DST_LANG)
-    chatbot.append(("给出输出文件清单", str(generated_conclusion_files + generated_html_files)))
-    yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
-
-
-def 解析PDF(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt):
+def 解析PDF_简单拆解(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt):
     """
-    此函数已经弃用
+    注意：此函数已经弃用！！新函数位于：crazy_functions/pdf_fns/parse_pdf.py
     """
     import copy
     TOKEN_LIMIT_PER_FRAGMENT = 1024
@@ -97,7 +29,7 @@ def 解析PDF(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot,
 
         # 为了更好的效果，我们剥离Introduction之后的部分（如果有）
         paper_meta = page_one_fragments[0].split('introduction')[0].split('Introduction')[0].split('INTRODUCTION')[0]
-        
+
         # 单线，获取文章meta信息
         paper_meta_info = yield from request_gpt_model_in_new_thread_with_ui_alive(
             inputs=f"以下是一篇学术论文的基础信息，请从中提取出“标题”、“收录会议或期刊”、“作者”、“摘要”、“编号”、“作者邮箱”这六个部分。请用markdown格式输出，最后用中文翻译摘要部分。请提取：{paper_meta}",
@@ -116,12 +48,13 @@ def 解析PDF(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot,
             chatbot=chatbot,
             history_array=[[paper_meta] for _ in paper_fragments],
             sys_prompt_array=[
-                "请你作为一个学术翻译，负责把学术论文准确翻译成中文。注意文章中的每一句话都要翻译。" for _ in paper_fragments],
+                "请你作为一个学术翻译，负责把学术论文准确翻译成中文。注意文章中的每一句话都要翻译。" + plugin_kwargs.get("additional_prompt", "")
+                for _ in paper_fragments],
             # max_workers=5  # OpenAI所允许的最大并行过载
         )
         gpt_response_collection_md = copy.deepcopy(gpt_response_collection)
         # 整理报告的格式
-        for i,k in enumerate(gpt_response_collection_md): 
+        for i,k in enumerate(gpt_response_collection_md):
             if i%2==0:
                 gpt_response_collection_md[i] = f"\n\n---\n\n ## 原文[{i//2}/{len(gpt_response_collection_md)//2}]： \n\n {paper_fragments[i//2].replace('#', '')}  \n\n---\n\n ## 翻译[{i//2}/{len(gpt_response_collection_md)//2}]：\n "
             else:
@@ -139,18 +72,18 @@ def 解析PDF(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot,
 
         # write html
         try:
-            ch = construct_html() 
+            ch = construct_html()
             orig = ""
             trans = ""
             gpt_response_collection_html = copy.deepcopy(gpt_response_collection)
-            for i,k in enumerate(gpt_response_collection_html): 
+            for i,k in enumerate(gpt_response_collection_html):
                 if i%2==0:
                     gpt_response_collection_html[i] = paper_fragments[i//2].replace('#', '')
                 else:
                     gpt_response_collection_html[i] = gpt_response_collection_html[i]
             final = ["论文概况", paper_meta_info.replace('# ', '### '),  "二、论文翻译",  ""]
             final.extend(gpt_response_collection_html)
-            for i, k in enumerate(final): 
+            for i, k in enumerate(final):
                 if i%2==0:
                     orig = k
                 if i%2==1:

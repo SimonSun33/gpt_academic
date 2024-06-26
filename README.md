@@ -1,7 +1,7 @@
-> [!IMPORTANT]  
-> 2024.1.18: 更新3.70版本，支持Mermaid绘图库（让大模型绘制脑图）  
-> 2024.1.17: 恭迎GLM4，全力支持Qwen、GLM、DeepseekCoder等国内中文大语言基座模型！  
-> 2024.1.17: 某些依赖包尚不兼容python 3.12，推荐python 3.11。  
+> [!IMPORTANT]
+> 2024.6.1: 版本3.80加入插件二级菜单功能（详见wiki）  
+> 2024.5.1: 加入Doc2x翻译PDF论文的功能，[查看详情](https://github.com/binary-husky/gpt_academic/wiki/Doc2x)  
+> 2024.3.11: 全力支持Qwen、GLM、DeepseekCoder等中文大语言模型！ SoVits语音克隆模块，[查看详情](https://www.bilibili.com/video/BV1Rp421S7tF/) 
 > 2024.1.17: 安装依赖时，请选择`requirements.txt`中**指定的版本**。 安装命令：`pip install -r requirements.txt`。本项目完全开源免费，您可通过订阅[在线服务](https://github.com/binary-husky/gpt_academic/wiki/online)的方式鼓励本项目的发展。
 simon
 <br>
@@ -67,7 +67,7 @@ Read this in [English](docs/README.English.md) | [日本語](docs/README.Japanes
 读论文、[翻译](https://www.bilibili.com/video/BV1KT411x7Wn)论文 | [插件] 一键解读latex/pdf论文全文并生成摘要
 Latex全文[翻译](https://www.bilibili.com/video/BV1nk4y1Y7Js/)、[润色](https://www.bilibili.com/video/BV1FT411H7c5/) | [插件] 一键翻译或润色latex论文
 批量注释生成 | [插件] 一键批量生成函数注释
-Markdown[中英互译](https://www.bilibili.com/video/BV1yo4y157jV/) | [插件] 看到上面5种语言的[README](https://github.com/binary-husky/gpt_academic/blob/master/docs/README_EN.md)了吗？就是出自他的手笔
+Markdown[中英互译](https://www.bilibili.com/video/BV1yo4y157jV/) | [插件] 看到上面5种语言的[README](https://github.com/binary-husky/gpt_academic/blob/master/docs/README.English.md)了吗？就是出自他的手笔
 [PDF论文全文翻译功能](https://www.bilibili.com/video/BV1KT411x7Wn) | [插件] PDF论文提取题目&摘要+翻译全文（多线程）
 [Arxiv小助手](https://www.bilibili.com/video/BV1LM4y1279X) | [插件] 输入arxiv文章url即可一键翻译摘要+下载PDF
 Latex论文一键校对 | [插件] 仿Grammarly对Latex文章进行语法、拼写纠错+输出对照PDF
@@ -85,6 +85,10 @@ Latex论文一键校对 | [插件] 仿Grammarly对Latex文章进行语法、拼�
 - 新界面（修改`config.py`中的LAYOUT选项即可实现“左右布局”和“上下布局”的切换）
 <div align="center">
 <img src="https://user-images.githubusercontent.com/96192199/279702205-d81137c3-affd-4cd1-bb5e-b15610389762.gif" width="700" >
+</div>
+
+<div align="center">
+<img src="https://github.com/binary-husky/gpt_academic/assets/96192199/70ff1ec5-e589-4561-a29e-b831079b37fb.gif" width="700" >
 </div>
 
 

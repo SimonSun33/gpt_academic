@@ -82,6 +82,9 @@ def generate_from_baidu_qianfan(inputs, llm_kwargs, history, system_prompt):
         "ERNIE-Bot":            "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/completions",
         "ERNIE-Bot-turbo":      "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/eb-instant",
         "BLOOMZ-7B":            "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/bloomz_7b1",
+        "ERNIE-Speed-128K":     "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/ernie-speed-128k",
+        "ERNIE-Speed-8K":       "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/ernie_speed",
+        "ERNIE-Lite-8K":        "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/ernie-lite-8k",
 
         "Llama-2-70B-Chat":     "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/llama_2_70b",
         "Llama-2-13B-Chat":     "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/llama_2_13b",
@@ -117,7 +120,8 @@ def generate_from_baidu_qianfan(inputs, llm_kwargs, history, system_prompt):
                 raise RuntimeError(dec['error_msg'])
 
 
-def predict_no_ui_long_connection(inputs, llm_kwargs, history=[], sys_prompt="", observe_window=[], console_slience=False):
+def predict_no_ui_long_connection(inputs:str, llm_kwargs:dict, history:list=[], sys_prompt:str="",
+                                  observe_window:list=[], console_slience:bool=False):
     """
         ⭐多线程方法
         函数的说明请见 request_llms/bridge_all.py

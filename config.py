@@ -30,11 +30,40 @@ if USE_PROXY:
 else:
     proxies = None
 
-# ------------------------------------ 以下配置可以优化体验, 但大部分场合下并不需要修改 ------------------------------------
+# [step 3]>> 模型选择是 (注意: LLM_MODEL是默认选中的模型, 它*必须*被包含在AVAIL_LLM_MODELS列表中 )
+LLM_MODEL = "gpt-3.5-turbo-16k" # 可选 ↓↓↓
+AVAIL_LLM_MODELS = ["gpt-4-1106-preview", "gpt-4-turbo-preview", "gpt-4-vision-preview",
+                    "gpt-4o", "gpt-4-turbo", "gpt-4-turbo-2024-04-09",
+                    "gpt-3.5-turbo-1106", "gpt-3.5-turbo-16k", "gpt-3.5-turbo", "azure-gpt-3.5",
+                    "gpt-4", "gpt-4-32k", "azure-gpt-4", "glm-4", "glm-4v", "glm-3-turbo",
+                    "gemini-pro", "chatglm3"
+                    ]
+# --- --- --- ---
+# P.S. 其他可用的模型还包括
+# AVAIL_LLM_MODELS = [
+#   "glm-4-0520", "glm-4-air", "glm-4-airx", "glm-4-flash",
+#   "qianfan", "deepseekcoder",
+#   "spark", "sparkv2", "sparkv3", "sparkv3.5",
+#   "qwen-turbo", "qwen-plus", "qwen-max", "qwen-local",
+#   "moonshot-v1-128k", "moonshot-v1-32k", "moonshot-v1-8k",
+#   "gpt-3.5-turbo-0613", "gpt-3.5-turbo-16k-0613", "gpt-3.5-turbo-0125", "gpt-4o-2024-05-13"
+#   "claude-3-haiku-20240307","claude-3-sonnet-20240229","claude-3-opus-20240229", "claude-2.1", "claude-instant-1.2",
+#   "moss", "llama2", "chatglm_onnx", "internlm", "jittorllms_pangualpha", "jittorllms_llama",
+#   "deepseek-chat" ,"deepseek-coder",
+#   "yi-34b-chat-0205","yi-34b-chat-200k","yi-large","yi-medium","yi-spark","yi-large-turbo","yi-large-preview",
+# ]
+# --- --- --- ---
+# 此外，您还可以在接入one-api/vllm/ollama时，
+# 使用"one-api-*","vllm-*","ollama-*"前缀直接使用非标准方式接入的模型，例如
+# AVAIL_LLM_MODELS = ["one-api-claude-3-sonnet-20240229(max_token=100000)", "ollama-phi3(max_token=4096)"]
+# --- --- --- ---
+
+
+# --------------- 以下配置可以优化体验 ---------------
 
 # 重新URL重新定向，实现更换API_URL的作用（高危设置! 常规情况下不要修改! 通过修改此设置，您将把您的API-KEY和对话隐私完全暴露给您设定的中间人！）
 # 格式: API_URL_REDIRECT = {"https://api.openai.com/v1/chat/completions": "在这里填写重定向的api.openai.com的URL"}
-# 举例: API_URL_REDIRECT = {"https://api.openai.com/v1/chat/completions": "https://reverse-proxy-url/v1/chat/completions"}
+# 举例: API_URL_REDIRECT = {"https://api.openai.com/v1/chat/completions": "https://reverse-proxy-url/v1/chat/completions", "http://localhost:11434/api/chat": "在这里填写您ollama的URL"}
 API_URL_REDIRECT = {}
 
 
@@ -77,28 +106,16 @@ TIMEOUT_SECONDS = 30
 WEB_PORT = -1
 
 
+# 是否自动打开浏览器页面
+AUTO_OPEN_BROWSER = True
+
+
 # 如果OpenAI不响应（网络卡顿、代理失败、KEY失效），重试的次数限制
 MAX_RETRY = 2
 
 
 # 插件分类默认选项
 DEFAULT_FN_GROUPS = ['对话', '编程', '学术', '智能体']
-
-
-# 模型选择是 (注意: LLM_MODEL是默认选中的模型, 它*必须*被包含在AVAIL_LLM_MODELS列表中 )
-LLM_MODEL = "gpt-3.5-turbo-16k" # 可选 ↓↓↓
-AVAIL_LLM_MODELS = ["gpt-4-1106-preview", "gpt-4-turbo-preview", "gpt-4-vision-preview",
-                    "gpt-3.5-turbo-1106", "gpt-3.5-turbo-16k", "gpt-3.5-turbo", "azure-gpt-3.5",
-                    "gpt-4", "gpt-4-32k", "azure-gpt-4", "glm-4", "glm-3-turbo",
-                    "gemini-pro", "chatglm3", "claude-2"]
-# P.S. 其他可用的模型还包括 [
-# "moonshot-v1-128k", "moonshot-v1-32k", "moonshot-v1-8k",
-# "qwen-turbo", "qwen-plus", "qwen-max",
-# "zhipuai", "qianfan", "deepseekcoder", "llama2", "qwen-local", "gpt-3.5-turbo-0613", "moss",
-# "gpt-3.5-turbo-16k-0613", "gpt-3.5-random", "api2d-gpt-3.5-turbo", 'api2d-gpt-3.5-turbo-16k',
-# "spark", "sparkv2", "sparkv3", "sparkv3.5",
-# "chatglm_onnx", "claude-1-100k", "claude-2", "internlm", "jittorllms_pangualpha", "jittorllms_llama"
-# ]
 
 
 # 定义界面上“询问多个GPT模型”插件应该使用哪些模型，请从AVAIL_LLM_MODELS中选择，并在不同模型之间用`&`间隔，例如"gpt-3.5-turbo&chatglm3&azure-gpt-4"
@@ -118,7 +135,7 @@ DASHSCOPE_API_KEY = "" # 阿里灵积云API_KEY
 # 百度千帆（LLM_MODEL="qianfan"）
 BAIDU_CLOUD_API_KEY = ''
 BAIDU_CLOUD_SECRET_KEY = ''
-BAIDU_CLOUD_QIANFAN_MODEL = 'ERNIE-Bot'    # 可选 "ERNIE-Bot-4"(文心大模型4.0), "ERNIE-Bot"(文心一言), "ERNIE-Bot-turbo", "BLOOMZ-7B", "Llama-2-70B-Chat", "Llama-2-13B-Chat", "Llama-2-7B-Chat"
+BAIDU_CLOUD_QIANFAN_MODEL = 'ERNIE-Bot'    # 可选 "ERNIE-Bot-4"(文心大模型4.0), "ERNIE-Bot"(文心一言), "ERNIE-Bot-turbo", "BLOOMZ-7B", "Llama-2-70B-Chat", "Llama-2-13B-Chat", "Llama-2-7B-Chat", "ERNIE-Speed-128K", "ERNIE-Speed-8K", "ERNIE-Lite-8K"
 
 
 # 如果使用ChatGLM2微调模型，请把 LLM_MODEL="chatglmft"，并在此处指定模型路径
@@ -128,6 +145,7 @@ CHATGLM_PTUNING_CHECKPOINT = "" # 例如"/home/hmp/ChatGLM2-6B/ptuning/output/6b
 # 本地LLM模型如ChatGLM的执行方式 CPU/GPU
 LOCAL_MODEL_DEVICE = "cpu" # 可选 "cuda"
 LOCAL_MODEL_QUANT = "FP16" # 默认 "FP16" "INT4" 启用量化INT4版本 "INT8" 启用量化INT8版本
+
 
 # 设置gradio的并行线程数（不需要修改）
 CONCURRENT_COUNT = 100
@@ -146,7 +164,8 @@ ADD_WAIFU = False
 AUTHENTICATION = []
 
 
-# 如果需要在二级路径下运行（常规情况下，不要修改!!）（需要配合修改main.py才能生效!）
+# 如果需要在二级路径下运行（常规情况下，不要修改!!）
+# （举例 CUSTOM_PATH = "/gpt_academic"，可以让软件运行在 http://ip:port/gpt_academic/ 下。）
 CUSTOM_PATH = "/"
 
 
@@ -174,19 +193,19 @@ AZURE_ENGINE = "填入你亲手写的部署名"            # 读 docs\use_azure.
 AZURE_CFG_ARRAY = {}
 
 
-# 使用Newbing (不推荐使用，未来将删除)
-NEWBING_STYLE = "creative"  # ["creative", "balanced", "precise"]
-NEWBING_COOKIES = """
-put your new bing cookies here
-"""
-
-
-# 阿里云实时语音识别 配置难度较高 仅建议高手用户使用 参考 https://github.com/binary-husky/gpt_academic/blob/master/docs/use_audio.md
+# 阿里云实时语音识别 配置难度较高
+# 参考 https://github.com/binary-husky/gpt_academic/blob/master/docs/use_audio.md
 ENABLE_AUDIO = False
 ALIYUN_TOKEN=""     # 例如 f37f30e0f9934c34a992f6f64f7eba4f
 ALIYUN_APPKEY=""    # 例如 RoPlZrM88DnAFkZK
 ALIYUN_ACCESSKEY="" # （无需填写）
 ALIYUN_SECRET=""    # （无需填写）
+
+
+# GPT-SOVITS 文本转语音服务的运行地址（将语言模型的生成文本朗读出来）
+TTS_TYPE = "EDGE_TTS" # EDGE_TTS / LOCAL_SOVITS_API / DISABLE
+GPT_SOVITS_URL = ""
+EDGE_TTS_VOICE = "zh-CN-XiaoxiaoNeural"
 
 
 # 接入讯飞星火大模型 https://console.xfyun.cn/services/iat
@@ -200,21 +219,33 @@ ZHIPUAI_API_KEY = ""
 ZHIPUAI_MODEL = "" # 此选项已废弃，不再需要填写
 
 
-# # 火山引擎YUNQUE大模型
-# YUNQUE_SECRET_KEY = ""
-# YUNQUE_ACCESS_KEY = ""
-# YUNQUE_MODEL = ""
-
-
 # Claude API KEY
 ANTHROPIC_API_KEY = ""
+
 
 # 月之暗面 API KEY
 MOONSHOT_API_KEY = ""
 
+
+# 零一万物(Yi Model) API KEY
+YIMODEL_API_KEY = ""
+
+
+# 深度求索(DeepSeek) API KEY，默认请求地址为"https://api.deepseek.com/v1/chat/completions"
+DEEPSEEK_API_KEY = ""
+
+
+# 紫东太初大模型 https://ai-maas.wair.ac.cn
+TAICHU_API_KEY = ""
+
+
 # Mathpix 拥有执行PDF的OCR功能，但是需要注册账号
 MATHPIX_APPID = ""
 MATHPIX_APPKEY = ""
+
+
+# DOC2X的PDF解析服务，注册账号并获取API KEY: https://doc2x.noedgeai.com/login
+DOC2X_API_KEY = ""
 
 
 # 自定义API KEY格式
@@ -238,6 +269,10 @@ GROBID_URLS = [
 ]
 
 
+# Searxng互联网检索服务
+SEARXNG_URL = "https://cloud-1.agent-matrix.com/"
+
+
 # 是否允许通过自然语言描述修改本页的配置，该功能具有一定的危险性，默认关闭
 ALLOW_RESET_CONFIG = False
 
@@ -246,21 +281,21 @@ ALLOW_RESET_CONFIG = False
 AUTOGEN_USE_DOCKER = False
 
 
-# 临时的上传文件夹位置，请勿修改
+# 临时的上传文件夹位置，请尽量不要修改
 PATH_PRIVATE_UPLOAD = "private_upload"
 
 
-# 日志文件夹的位置，请勿修改
+# 日志文件夹的位置，请尽量不要修改
 PATH_LOGGING = "gpt_log"
 
 
-# 除了连接OpenAI之外，还有哪些场合允许使用代理，请勿修改
+# 存储翻译好的arxiv论文的路径，请尽量不要修改
+ARXIV_CACHE_DIR = "gpt_log/arxiv_cache"
+
+
+# 除了连接OpenAI之外，还有哪些场合允许使用代理，请尽量不要修改
 WHEN_TO_USE_PROXY = ["Download_LLM", "Download_Gradio_Theme", "Connect_Grobid",
                      "Warmup_Modules", "Nougat_Download", "AutoGen"]
-
-
-# *实验性功能*: 自动检测并屏蔽失效的KEY，请勿使用
-BLOCK_INVALID_APIKEY = False
 
 
 # 启用插件热加载
@@ -270,7 +305,11 @@ PLUGIN_HOT_RELOAD = False
 # 自定义按钮的最大数量限制
 NUM_CUSTOM_BASIC_BTN = 4
 
+
+
 """
+--------------- 配置关联关系说明 ---------------
+
 在线大模型配置关联关系示意图
 │
 ├── "gpt-3.5-turbo" 等openai模型
@@ -294,7 +333,7 @@ NUM_CUSTOM_BASIC_BTN = 4
 │   ├── XFYUN_API_SECRET
 │   └── XFYUN_API_KEY
 │
-├── "claude-1-100k" 等claude模型
+├── "claude-3-opus-20240229" 等claude模型
 │   └── ANTHROPIC_API_KEY
 │
 ├── "stack-claude"
@@ -309,15 +348,19 @@ NUM_CUSTOM_BASIC_BTN = 4
 ├── "glm-4", "glm-3-turbo", "zhipuai" 智谱AI大模型
 │   └── ZHIPUAI_API_KEY
 │
+├── "yi-34b-chat-0205", "yi-34b-chat-200k" 等零一万物(Yi Model)大模型
+│   └── YIMODEL_API_KEY
+│
 ├── "qwen-turbo" 等通义千问大模型
 │   └──  DASHSCOPE_API_KEY
 │
 ├── "Gemini"
 │   └──  GEMINI_API_KEY
 │
-└── "newbing" Newbing接口不再稳定，不推荐使用
-    ├── NEWBING_STYLE
-    └── NEWBING_COOKIES
+└── "one-api-...(max_token=...)" 用一种更方便的方式接入one-api多模型管理界面
+    ├── AVAIL_LLM_MODELS
+    ├── API_KEY
+    └── API_URL_REDIRECT
 
 
 本地大模型示意图
@@ -350,6 +393,9 @@ NUM_CUSTOM_BASIC_BTN = 4
 
 
 插件在线服务配置依赖关系示意图
+│
+├── 互联网检索
+│   └── SEARXNG_URL
 │
 ├── 语音功能
 │   ├── ENABLE_AUDIO
